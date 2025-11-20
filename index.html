@@ -1,1 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso de familias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --success: #059669;
+      --error: #dc2626;
+    }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 32px 24px 56px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 960px;
+      margin: -48px auto 48px;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      padding: 24px;
+    }
+
+    .card + .card {
+      margin-top: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .helper-text {
+      color: var(--muted);
+      margin: 6px 0 0;
+      font-size: 14px;
+    }
+
+    .result {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+    }
+
+    .result.visible {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      align-items: center;
+    }
+
+    .status {
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status.success {
+      color: var(--success);
+      background: rgba(5, 150, 105, 0.08);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .status.error {
+      color: var(--error);
+      background: rgba(220, 38, 38, 0.08);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .qr-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 24px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 28px 16px 48px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" integrity="sha512-9m6G7gpTVks3oOWIO6zhXHDgUZwdtYYQJkEua2uUg+vU3yGmR1MbfHJ7Pz3b24USCqMVoy7WBL7QkKwnr6zLfQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <header>
+    <h1>Ingreso de familias al evento</h1>
+    <p>Introduce el código de 4 dígitos que recibiste para obtener tu acceso.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <label for="family-code">Código de familia</label>
+      <input id="family-code" name="family-code" type="text" inputmode="numeric" maxlength="4" placeholder="Ej. 4821" autocomplete="one-time-code">
+      <p class="helper-text">El código debe tener 4 dígitos. Están asignados del <strong>1000</strong> al <strong>1599</strong> (600 invitaciones en total). Si no lo tienes, revisa el mensaje de WhatsApp enviado por el colegio.</p>
+      <div class="actions">
+        <button id="submit-btn" type="button">Ver acceso</button>
+        <button id="reset-btn" type="button" style="background: transparent; color: var(--muted); border: 1px solid var(--border);">Limpiar</button>
+      </div>
+
+      <div id="result" class="result">
+        <div>
+          <div id="status" class="status"></div>
+          <p id="detail"></p>
+          <a id="access-link" class="link" href="#" target="_blank" rel="noopener" aria-hidden="true" style="display:none;">Abrir enlace de acceso →</a>
+        </div>
+        <div id="qr" class="qr-wrapper" aria-live="polite" aria-atomic="true" style="display:none;">
+          <canvas id="qr-canvas" width="220" height="220" aria-label="Código QR de acceso"></canvas>
+          <small style="color: var(--muted);">Escanéalo en la entrada para validar tu invitación.</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0;">Cómo funciona</h2>
+      <ol style="color: var(--muted); line-height: 1.6; padding-left: 20px;">
+        <li>El colegio envía a cada familia un código único de 4 dígitos.</li>
+        <li>Ingresa el código en esta página y presiona <strong>Ver acceso</strong>.</li>
+        <li>Si el código es válido, verás el enlace de invitación y su código QR.</li>
+        <li>Guarda el QR o el enlace y muéstralo en la entrada del evento.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    Plataforma interna de control de accesos del colegio.
+  </footer>
+
+  <script>
+    // Generamos 600 IDs únicos (1000-1599) con sus enlaces individuales
+    const familyAccess = Array.from({ length: 600 }, (_, index) => String(1000 + index))
+      .reduce((acc, code) => {
+        acc[code] = {
+          nombre: `Invitación ${code}`,
+          url: `https://colegio.edu/accesos/${code}`
+        };
+        return acc;
+      }, {});
+
+    const codeInput = document.getElementById('family-code');
+    const submitBtn = document.getElementById('submit-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const result = document.getElementById('result');
+    const statusEl = document.getElementById('status');
+    const detailEl = document.getElementById('detail');
+    const accessLink = document.getElementById('access-link');
+    const qrWrapper = document.getElementById('qr');
+    const qrCanvas = document.getElementById('qr-canvas');
+
+    const qr = new QRious({
+      element: qrCanvas,
+      value: '',
+      size: 220,
+      level: 'M'
+    });
+
+    function sanitize(code) {
+      return code.replace(/\D/g, '').slice(0, 4);
+    }
+
+    function showResult({ success, message, link }) {
+      result.classList.add('visible');
+
+      if (success) {
+        statusEl.className = 'status success';
+        statusEl.textContent = 'Código válido';
+        detailEl.textContent = message;
+
+        accessLink.href = link;
+        accessLink.style.display = 'inline-flex';
+        accessLink.setAttribute('aria-hidden', 'false');
+        accessLink.textContent = 'Abrir enlace de acceso →';
+
+        qrWrapper.style.display = 'flex';
+        qr.value = link;
+      } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Código no encontrado';
+        detailEl.textContent = message;
+
+        accessLink.href = '#';
+        accessLink.style.display = 'none';
+        accessLink.setAttribute('aria-hidden', 'true');
+
+        qrWrapper.style.display = 'none';
+      }
+    }
+
+    function handleSubmit() {
+      const normalized = sanitize(codeInput.value);
+      codeInput.value = normalized;
+
+      if (normalized.length !== 4) {
+        showResult({
+          success: false,
+          message: 'Por favor ingresa los 4 dígitos completos de tu código.'
+        });
+        return;
+      }
+
+      const data = familyAccess[normalized];
+
+      if (data) {
+        showResult({
+          success: true,
+          message: `${data.nombre}, este es tu enlace personalizado listo para el acceso con código QR:`,
+          link: data.url
+        });
+      } else {
+        showResult({
+          success: false,
+          message: 'No encontramos ese código. Verifica el número recibido o comunícate con la coordinación.'
+        });
+      }
+    }
+
+    function resetView() {
+      codeInput.value = '';
+      result.classList.remove('visible');
+      statusEl.className = 'status';
+      statusEl.textContent = '';
+      detailEl.textContent = '';
+      accessLink.href = '#';
+      accessLink.style.display = 'none';
+      accessLink.setAttribute('aria-hidden', 'true');
+      qrWrapper.style.display = 'none';
+    }
+
+    submitBtn.addEventListener('click', handleSubmit);
+    resetBtn.addEventListener('click', resetView);
+    codeInput.addEventListener('keyup', event => {
+      if (event.key === 'Enter') {
+        handleSubmit();
+      }
+    });
+  </script>
+</body>
+</html>
