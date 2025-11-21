@@ -75,6 +75,7 @@
       border-radius: 12px;
       border: 1px solid var(--border);
       font-size: 16px;
+      text-transform: uppercase;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
@@ -89,6 +90,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     button {
@@ -108,6 +110,12 @@
 
     button:active {
       transform: translateY(1px);
+    }
+
+    .secondary-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
     }
 
     .helper-text {
@@ -164,17 +172,16 @@
       border-radius: 12px;
     }
 
-    .link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      color: var(--primary);
-      text-decoration: none;
+    .code-display {
+      font-family: monospace;
+      font-size: 20px;
+      letter-spacing: 4px;
+      font-weight: 700;
+      margin-top: 8px;
     }
 
-    .link:hover {
-      text-decoration: underline;
+    .link {
+      display: none; /* ya no usamos enlace clickeable */
     }
 
     footer {
@@ -203,28 +210,40 @@
 <body>
   <header>
     <h1>Ingreso de familias al evento</h1>
-    <p>Introduce el código de 4 dígitos que recibiste para obtener tu acceso.</p>
+    <p>Introduce el código de 4 caracteres que recibiste para obtener tu acceso.</p>
   </header>
 
   <main>
     <section class="card">
       <label for="family-code">Código de familia</label>
-      <input id="family-code" name="family-code" type="text" inputmode="numeric" maxlength="4" placeholder="Ej. 4821" autocomplete="one-time-code">
-      <p class="helper-text">El código debe tener 4 dígitos. Si no lo tienes, revisa el mensaje de WhatsApp enviado por el colegio.</p>
+      <input
+        id="family-code"
+        name="family-code"
+        type="text"
+        maxlength="4"
+        placeholder="Ej. A7F3"
+        autocomplete="one-time-code"
+      >
+      <p class="helper-text">
+        El código debe tener <strong>4 caracteres en MAYÚSCULAS (letras y números)</strong>.
+        Si no lo tienes, revisa el mensaje de WhatsApp enviado por el colegio.
+      </p>
       <div class="actions">
         <button id="submit-btn" type="button">Ver acceso</button>
-        <button id="reset-btn" type="button" style="background: transparent; color: var(--muted); border: 1px solid var(--border);">Limpiar</button>
+        <button id="reset-btn" type="button" class="secondary-btn">Limpiar</button>
       </div>
 
       <div id="result" class="result">
         <div>
           <div id="status" class="status"></div>
           <p id="detail"></p>
-          <a id="access-link" class="link" href="#" target="_blank" rel="noopener" aria-hidden="true" style="display:none;">Abrir enlace de acceso →</a>
         </div>
         <div id="qr" class="qr-wrapper" aria-live="polite" aria-atomic="true" style="display:none;">
           <canvas id="qr-canvas" width="220" height="220" aria-label="Código QR de acceso"></canvas>
-          <small style="color: var(--muted);">Escanéalo en la entrada para validar tu invitación.</small>
+          <div id="code-display" class="code-display"></div>
+          <small style="color: var(--muted);">
+            Escanéalo o muestra este código en la entrada para validar tu invitación.
+          </small>
         </div>
       </div>
     </section>
@@ -232,10 +251,10 @@
     <section class="card">
       <h2 style="margin-top:0;">Cómo funciona</h2>
       <ol style="color: var(--muted); line-height: 1.6; padding-left: 20px;">
-        <li>El colegio envía a cada familia un código único de 4 dígitos.</li>
+        <li>El colegio envía a cada familia un código único de 4 caracteres.</li>
         <li>Ingresa el código en esta página y presiona <strong>Ver acceso</strong>.</li>
-        <li>Si el código es válido, verás el enlace de invitación y su código QR.</li>
-        <li>Guarda el QR o el enlace y muéstralo en la entrada del evento.</li>
+        <li>Si el código es válido, verás un <strong>código QR especial</strong> generado con ese código.</li>
+        <li>Muestra el QR o el código en la entrada del evento para acceder.</li>
       </ol>
     </section>
   </main>
@@ -245,115 +264,26 @@
   </footer>
 
   <script>
-    // Datos de ejemplo: reemplaza o amplía esta lista con los códigos reales
-    const familyAccess = {
-      '1823': { nombre: 'Familia García', url: 'https://colegio.edu/accesos/1823' },
-      '2049': { nombre: 'Familia Martínez', url: 'https://colegio.edu/accesos/2049' },
-      '3140': { nombre: 'Familia López', url: 'https://colegio.edu/accesos/3140' },
-      '4275': { nombre: 'Familia Torres', url: 'https://colegio.edu/accesos/4275' },
-      '5561': { nombre: 'Familia Rodríguez', url: 'https://colegio.edu/accesos/5561' },
-      '6088': { nombre: 'Familia Castillo', url: 'https://colegio.edu/accesos/6088' },
-      '7192': { nombre: 'Familia Herrera', url: 'https://colegio.edu/accesos/7192' },
-      '8304': { nombre: 'Familia Soto', url: 'https://colegio.edu/accesos/8304' },
-      '9415': { nombre: 'Familia Rojas', url: 'https://colegio.edu/accesos/9415' }
-    };
-
-    const codeInput = document.getElementById('family-code');
-    const submitBtn = document.getElementById('submit-btn');
-    const resetBtn = document.getElementById('reset-btn');
-    const result = document.getElementById('result');
-    const statusEl = document.getElementById('status');
-    const detailEl = document.getElementById('detail');
-    const accessLink = document.getElementById('access-link');
-    const qrWrapper = document.getElementById('qr');
-    const qrCanvas = document.getElementById('qr-canvas');
-
-    const qr = new QRious({
-      element: qrCanvas,
-      value: '',
-      size: 220,
-      level: 'M'
-    });
-
-    function sanitize(code) {
-      return code.replace(/\D/g, '').slice(0, 4);
-    }
-
-    function showResult({ success, message, link }) {
-      result.classList.add('visible');
-
-      if (success) {
-        statusEl.className = 'status success';
-        statusEl.textContent = 'Código válido';
-        detailEl.textContent = message;
-
-        accessLink.href = link;
-        accessLink.style.display = 'inline-flex';
-        accessLink.setAttribute('aria-hidden', 'false');
-        accessLink.textContent = 'Abrir enlace de acceso →';
-
-        qrWrapper.style.display = 'flex';
-        qr.value = link;
-      } else {
-        statusEl.className = 'status error';
-        statusEl.textContent = 'Código no encontrado';
-        detailEl.textContent = message;
-
-        accessLink.href = '#';
-        accessLink.style.display = 'none';
-        accessLink.setAttribute('aria-hidden', 'true');
-
-        qrWrapper.style.display = 'none';
-      }
-    }
-
-    function handleSubmit() {
-      const normalized = sanitize(codeInput.value);
-      codeInput.value = normalized;
-
-      if (normalized.length !== 4) {
-        showResult({
-          success: false,
-          message: 'Por favor ingresa los 4 dígitos completos de tu código.'
-        });
-        return;
-      }
-
-      const data = familyAccess[normalized];
-
-      if (data) {
-        showResult({
-          success: true,
-          message: `${data.nombre}, este es tu enlace personalizado:`,
-          link: data.url
-        });
-      } else {
-        showResult({
-          success: false,
-          message: 'No encontramos ese código. Verifica el número recibido o comunícate con la coordinación.'
-        });
-      }
-    }
-
-    function resetView() {
-      codeInput.value = '';
-      result.classList.remove('visible');
-      statusEl.className = 'status';
-      statusEl.textContent = '';
-      detailEl.textContent = '';
-      accessLink.href = '#';
-      accessLink.style.display = 'none';
-      accessLink.setAttribute('aria-hidden', 'true');
-      qrWrapper.style.display = 'none';
-    }
-
-    submitBtn.addEventListener('click', handleSubmit);
-    resetBtn.addEventListener('click', resetView);
-    codeInput.addEventListener('keyup', event => {
-      if (event.key === 'Enter') {
-        handleSubmit();
-      }
-    });
-  </script>
-</body>
-</html>
+    // 600 CÓDIGOS VÁLIDOS (4 caracteres, mayúsculas, letras y números)
+    const validCodes = new Set([
+  '01W7', '02Y2', '03BN', '083C', '0B92', '0BMA', '0D8Z', '0DHH', '0FLD', '0JVN', '0O3T', '0OD8',
+  '0OJ4', '0QS1', '0SZZ', '127N', '13MN', '14OA', '178X', '1AUG', '1FFV', '1KQV', '1LEP', '1MM9',
+  '1R10', '1VKT', '1XEL', '1Y0F', '1ZDD', '2150', '231L', '26IK', '27XJ', '289G', '294P', '2A7F',
+  '2C3V', '2EE8', '2F68', '2H9O', '2IEU', '2KSG', '2OZF', '2SV7', '2TBB', '2Y0E', '2YFM', '2YR6',
+  '308Z', '30B0', '32NB', '32WD', '34VQ', '35F9', '3AW1', '3EZ6', '3F1R', '3F3B', '3G08', '3G8I',
+  '3HFT', '3IJN', '3JCZ', '3JBJ', '3KLE', '3N0U', '3O3E', '3O4G', '3O8B', '3REN', '3SBW', '3TFH',
+  '3TIS', '3WK3', '3WNE', '3Y6H', '40M3', '410F', '43C3', '44YN', '45B1', '46FX', '47ZN', '48GG',
+  '4934', '4BRA', '4E1K', '4F10', '4H1I', '4H2Z', '4IGC', '4JGZ', '4K6Z', '4LP9', '4MDM', '4MYY',
+  '4NU3', '4P3V', '4QGQ', '4QT5', '4RP6', '4S4Q', '4T0K', '4THO', '4W3O', '4WRU', '4XGU', '4Y0G',
+  '4YML', '5081', '50D6', '513V', '52JI', '53DT', '54RZ', '565Y', '56M8', '57GR', '57MR', '57L1',
+  '5A0G', '5AD1', '5ARI', '5DKP', '5DU2', '5HS5', '5I1N', '5K5G', '5L3X', '5M0Q', '5ND7', '5NDR',
+  '5OEF', '5OYY', '5QOF', '5R64', '5S3X', '5T7N', '5ULI', '5V4L', '5Y55', '5ZOE', '60LG', '614P',
+  '61CE', '61MW', '62N3', '62S9', '64SB', '65RX', '673V', '67IK', '69IC', '69WX', '6A1E', '6A1Z',
+  '6B6U', '6C7T', '6D3J', '6D4R', '6DRD', '6G46', '6G5I', '6H9M', '6HIO', '6JND', '6KQG', '6KXC',
+  '6LWX', '6M0M', '6N2Q', '6N3Y', '6N6I', '6N9U', '6O9B', '6PZM', '6QHA', '6QUK', '6S2E', '6T3I',
+  '6T6V', '6VOB', '6WTE', '6X3L', '6X7P', '700T', '70VE', '71AC', '72CQ', '7352', '73YW', '74JW',
+  '75TT', '76NL', '76T8', '77CR', '77P8', '78GI', '78ZO', '7AE7', '7B7D', '7BV6', '7C87', '7CFX',
+  '7EYP', '7FBQ', '7FNR', '7IY7', '7J45', '7JFZ', '7JUF', '7K20', '7K3C', '7KK6', '7L27', '7L3D',
+  '7LC0', '7MG2', '7MGP', '7MZ5', '7NLI', '7O1J', '7PYY', '7Q8F', '7RG9', '7ROD', '7SFD', '7T7H',
+  '7TGI', '7U85', '7VWM', '7WAH', '7WTI', '7YSH', '801L', '809W', '81CN', '81QY', '8220', '825C',
+  '82N7', '83KN', '83LM
