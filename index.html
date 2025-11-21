@@ -286,4 +286,120 @@
   '7EYP', '7FBQ', '7FNR', '7IY7', '7J45', '7JFZ', '7JUF', '7K20', '7K3C', '7KK6', '7L27', '7L3D',
   '7LC0', '7MG2', '7MGP', '7MZ5', '7NLI', '7O1J', '7PYY', '7Q8F', '7RG9', '7ROD', '7SFD', '7T7H',
   '7TGI', '7U85', '7VWM', '7WAH', '7WTI', '7YSH', '801L', '809W', '81CN', '81QY', '8220', '825C',
-  '82N7', '83KN', '83LM
+  '82N7', '83KN', '83LM', '84Q7', '85IG', '85J6', '86AW', '87XD', '88SP', '8A0U', '8A1T', '8C2Z',
+  '8C71', '8D1V', '8D2X', '8D5M', '8D92', '8E8T', '8ECY', '8EY2', '8F67', '8FGQ', '8G4E', '8G4P',
+  '8H3J', '8H7Z', '8H9F', '8HAX', '8I7P', '8J1A', '8J2G', '8J4O', '8K0O', '8KX2', '8L8R', '8LXL',
+  '8M8X', '8N6F', '8NEG', '8NPG', '8NS2', '8O17', '8O3Q', '8O9B', '8OT4', '8P1Y', '8P6U', '8P7Q',
+  '8Q0X', '8QLQ', '8R3Q', '8R8D', '8R9D', '8S03', '8S3F', '8SC3', '8T54', '8TQ0', '8U6B', '8V01',
+  '8V2D', '8V2U', '8W9N', '8WQL', '8WWB', '8X4K', '8X8I', '8Y2N', '8YC8', '8Z38', '8ZGW', '8ZKC',
+  '901N', '90X7', '9180', '91F1', '91JT', '91L3', '91SU', '92TG', '93L7', '93V7', '94ED', '94W6',
+  '95F9', '95T8', '96HL', '97V6', '980H', '986E', '98QG', '98W7', '98WE', '99DR', '99LK', '9A2O',
+  '9A3Z', '9A7E', '9BCI', '9BG6', '9BHH', '9DTF', '9DYY', '9EQ4', '9F8L', '9FBZ', '9FMV', '9FQH',
+  '9G41', '9GDV', '9H3G', '9H5F', '9HH3', '9IE7', '9IY5', '9J4I', '9JNW', '9K2E', '9K3U', '9K90',
+  '9KQ7', '9L5B', '9LCP', '9MMP', '9N0M', '9N85', '9NJO', '9O52', '9OMX', '9P1P', '9P2H', '9Q0J',
+  '9Q8E', '9QK4', '9QKT', '9R7C', '9R9V', '9RA5', '9S7L', '9SV2', '9T78', '9TFF', '9TL8', '9U0O',
+  '9U3S', '9U4O', '9UEJ', '9UYS', '9V34', '9V6K', '9VQP', '9VWN', '9W73', '9WZ0', '9XKC', '9XWF',
+  '9Y3L', '9YB2', '9YNN', '9Z6H', '9Z7N', '9Z82', 'A1JP', 'A1OW', 'A2V1', 'A3L8', 'A3RS', 'A3XK',
+  'A4D5', 'A4FB', 'A4NN', 'A5V5', 'A6CQ', 'A7VZ', 'A8GG', 'A8L0', 'A8R7', 'A8T1', 'A9H6', 'AA0W',
+  'AB1J', 'AB3V', 'AB4N', 'AB7R', 'AB8A', 'ABQ9', 'AC0K', 'AC3G', 'ACM3', 'AD1I', 'AD4Y', 'AD9T',
+  'ADQ0', 'AEEI', 'AEPY', 'AF6I', 'AF70', 'AF8H', 'AG2O', 'AG3Y', 'AG8R', 'AGTD', 'AH03', 'AH78',
+  'AH9W', 'AHJG', 'AHMP', 'AI7S', 'AJ4N', 'AJ9Q', 'AJN9', 'AK2U', 'AK3R', 'AK4V', 'AKOH', 'AL0Z',
+  'AL8K', 'AL96', 'ALJY', 'ALM6', 'AM1C', 'AM8Y', 'AMQF', 'AN4T', 'AN5E', 'AN60', 'AN6J', 'AN9D',
+  'ANJL', 'ANMN', 'ANSM', 'AO19', 'AO8T', 'AOUN', 'AP0K', 'AP3S', 'AP9H', 'AQCQ', 'AQQ7', 'AR8I',
+  'ARF9', 'AS8P', 'AS9M', 'ASIR', 'AT05', 'AT5M', 'AT6B', 'AU1X', 'AUE6', 'AUWQ', 'AV8E', 'AVNS',
+  'AW37', 'AWJZ', 'AX2G', 'AXFU', 'AY4K', 'AY9I', 'AYLZ', 'AZ1S', 'AZ1V', 'AZF3'
+    ]);
+
+    const codeInput   = document.getElementById('family-code');
+    const submitBtn   = document.getElementById('submit-btn');
+    const resetBtn    = document.getElementById('reset-btn');
+    const result      = document.getElementById('result');
+    const statusEl    = document.getElementById('status');
+    const detailEl    = document.getElementById('detail');
+    const qrWrapper   = document.getElementById('qr');
+    const qrCanvas    = document.getElementById('qr-canvas');
+    const codeDisplay = document.getElementById('code-display');
+
+    const qr = new QRious({
+      element: qrCanvas,
+      value: '',
+      size: 220,
+      level: 'M'
+    });
+
+    function sanitize(code) {
+      return code
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(0, 4);
+    }
+
+    function showResult({ success, message, code }) {
+      result.classList.add('visible');
+
+      if (success) {
+        statusEl.className = 'status success';
+        statusEl.textContent = 'Código válido';
+        detailEl.textContent = message;
+
+        qrWrapper.style.display = 'flex';
+        codeDisplay.textContent = code;
+        qr.value = code; // El QR contiene solo el código, por ejemplo "AB12"
+      } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Código no encontrado';
+        detailEl.textContent = message;
+
+        qrWrapper.style.display = 'none';
+        codeDisplay.textContent = '';
+        qr.value = '';
+      }
+    }
+
+    function handleSubmit() {
+      const normalized = sanitize(codeInput.value);
+      codeInput.value = normalized;
+
+      if (normalized.length !== 4) {
+        showResult({
+          success: false,
+          message: 'Por favor ingresa los 4 caracteres completos de tu código.'
+        });
+        return;
+      }
+
+      if (validCodes.has(normalized)) {
+        showResult({
+          success: true,
+          message: 'Tu código es válido. Conserva este QR para el acceso al evento.',
+          code: normalized
+        });
+      } else {
+        showResult({
+          success: false,
+          message: 'No encontramos ese código. Verifica el código recibido o comunícate con la coordinación.'
+        });
+      }
+    }
+
+    function resetView() {
+      codeInput.value = '';
+      result.classList.remove('visible');
+      statusEl.className = 'status';
+      statusEl.textContent = '';
+      detailEl.textContent = '';
+      qrWrapper.style.display = 'none';
+      codeDisplay.textContent = '';
+      qr.value = '';
+    }
+
+    submitBtn.addEventListener('click', handleSubmit);
+    resetBtn.addEventListener('click', resetView);
+    codeInput.addEventListener('keyup', event => {
+      if (event.key === 'Enter') {
+        handleSubmit();
+      }
+    });
+  </script>
+</body>
+</html>
